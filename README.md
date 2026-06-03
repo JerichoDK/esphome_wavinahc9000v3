@@ -22,6 +22,30 @@ external_components:
 ```
 
 > Set `refresh: 1s` on first flash to force ESPHome to fetch the latest version. You can change it back to `0s` afterwards.
+>
+> ## Setup workflow
+
+### If you are migrating from v2 (or have an existing channel list)
+Simply copy your channel names into the `wavin_ahc9000` block and define your `climate:` and `sensor:` entities manually. No YAML generator needed.
+
+### If you are setting up from scratch (new installation)
+1. Add the `yaml_generator` package temporarily to your config:
+
+```yaml
+packages:
+  yaml_generator:
+    url: https://github.com/JerichoDK/esphome_wavinahc9000v3
+    ref: main
+    files:
+      - packages/yaml_generator.yaml
+    refresh: 0s
+```
+
+2. Flash the device and wait ~60 seconds for channel discovery
+3. In Home Assistant go to **Developer Tools → Actions** and call `esphome.<node>_wavin_publish_yaml_text_sensors`
+4. Go to **Developer Tools → Template**, paste the contents of `jinja_examples.j2` from this repo, and copy the rendered YAML from the Result panel
+5. Paste the generated YAML into your permanent `wavin.yaml`, remove the `yaml_generator` package, and reflash.
+6. ******************** ******************** ******************** ******************** ******************** ******************** ********************
 
 # ESPHome Component: Wavin AHC 9000 / Jablotron AC-116 (v3 restart)
 
