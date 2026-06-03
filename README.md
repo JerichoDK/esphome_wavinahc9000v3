@@ -1,3 +1,28 @@
+# ESPHome Wavin AHC9000 v3 - ESPHome 2026.x Compatible Fork
+
+This fork fixes compilation errors introduced in ESPHome 2026.4+ which broke the original repository.
+
+## Changes from original
+
+- Removed deprecated `ClimateTraits` methods (`set_supports_current_temperature`, `set_supports_action`, `set_supports_two_point_target_temperature`) from `wavin_ahc9000.cpp` — these were removed in ESPHome 2026.4
+- Rewrote `sensor.py` to use the new `sensor.sensor_schema()` API required by ESPHome 2026.x
+
+## How to use this fork
+
+Replace the `external_components` source in your `wavin.yaml`:
+
+```yaml
+external_components:
+  - source:
+      type: git
+      url: https://github.com/JerichoDK/esphome_wavinahc9000v3
+      ref: main
+    refresh: 1s
+    components: [wavin_ahc9000]
+```
+
+> Set `refresh: 1s` on first flash to force ESPHome to fetch the latest version. You can change it back to `0s` afterwards.
+
 # ESPHome Component: Wavin AHC 9000 / Jablotron AC-116 (v3 restart)
 
 Integrates the Wavin AHC 9000 (a.k.a. Jablotron AC-116) floor heating controller via its RS‑485 protocol (custom function codes 0x43 / 0x44 / 0x45). Provides auto‑discovery assisted YAML generation, single & grouped climate entities, comfort (floor‑temperature based) climates, and optional per‑channel sensors.
