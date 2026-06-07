@@ -1199,6 +1199,7 @@ climate::ClimateTraits WavinZoneClimate::traits() {
   float vmax = 35.0f;
   // For comfort climates (using floor temperature), adopt current floor min/max when available
   if (this->single_channel_set_ && this->use_floor_temperature_) {
+    t.add_feature_flags(CLIMATE_REQUIRES_TWO_POINT_TARGET_TEMPERATURE);
     float fmin = this->parent_->get_channel_floor_min_temp(this->single_channel_);
     float fmax = this->parent_->get_channel_floor_max_temp(this->single_channel_);
     if (!std::isnan(fmin)) vmin = fmin;
@@ -1206,7 +1207,9 @@ climate::ClimateTraits WavinZoneClimate::traits() {
   }
   t.set_visual_min_temperature(vmin);
   t.set_visual_max_temperature(vmax);
-  t.set_visual_temperature_step(0.5f);
+  t.set_visual_temperature_step(0.5f);  
+  t.add_feature_flags(CLIMATE_SUPPORTS_CURRENT_TEMPERATURE);
+  t.add_feature_flags(CLIMATE_SUPPORTS_ACTION);
   return t;
 }
 void WavinZoneClimate::control(const climate::ClimateCall &call) {
