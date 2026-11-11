@@ -124,6 +124,8 @@ void WavinAHC9000::update() {
   }
 
   for (uint8_t i = urgent_processed; i < this->poll_channels_per_cycle_ && !this->active_channels_.empty(); i++) {
+    // FIX 2: stop polling further channels while the bus is backing off
+    if (this->suspend_polling_until_ != 0 && millis() < this->suspend_polling_until_) break;
     // Wrap active index
     if (this->next_active_index_ >= this->active_channels_.size()) this->next_active_index_ = 0;
     uint8_t ch_num = this->active_channels_[this->next_active_index_]; // 1..16
@@ -133,6 +135,8 @@ void WavinAHC9000::update() {
 
     // Two steps per update to surface values faster
     for (int s = 0; s < 2; s++) {
+      // FIX 3: stop after a failed read so the main loop is never blocked for long
+      if (this->suspend_polling_until_ != 0 && millis() < this->suspend_polling_until_) break;
       switch (step) {
         case 0: {
           if (this->read_registers(CAT_CHANNELS, ch_page, CH_PRIMARY_ELEMENT, 1, regs) && regs.size() >= 1) {
@@ -345,6 +349,8 @@ bool WavinAHC9000::read_registers(uint8_t category, uint8_t page, uint8_t index,
     }
     // Timeout
     if (attempt + 1 == IO_RETRY_ATTEMPTS) {
+      // FIX 1: back off 15 s after a dead bus so the main loop/WiFi/API get time to run
+      this->suspend_polling_until_ = millis() + 15000;
       ESP_LOGW(TAG, "RX: timeout waiting for response after %u attempts (cat=%u idx=%u page=%u cnt=%u)", (unsigned) IO_RETRY_ATTEMPTS, category, index, page, count);
     } else {
       ESP_LOGD(TAG, "RX: timeout attempt %u (cat=%u idx=%u page=%u) -> retry", (unsigned) attempt + 1, category, index, page);
